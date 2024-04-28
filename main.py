@@ -8,7 +8,8 @@ import random
 import sqlite3
 from flask import Flask, url_for, request, render_template, redirect, request, abort
 from flask import send_file
-
+# from admin_files import new_task_to_db
+# from new_task_to_db import new_task_to_db
 app = Flask(__name__)
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -57,7 +58,6 @@ def main():
     app.run()
 
 
-# Сюда можно только зарегистрированным пользователям
 @app.route('/adminpage', methods=['GET', 'POST'])
 @login_required
 def news_delete(id):
@@ -137,29 +137,18 @@ def login():
 
 @app.route('/admin_page', methods=['POST', 'GET'])
 def admin_page():
-    print(-1)
-    if request.method == ['GET']:
-        print(0)
-        print(request.form)
+    if request.method == 'GET':
         return render_template('admin_page.html')
-    if request.method == ['POST']:
-        print(1)
-        name = request.form
-        print(name)
-
-    # if request.method == ['GET']:
-    #     return 'UJNJDJ'
-    # elif request.method == ['POST']:
-    #     print(2)
-    #     return render_template('admin_page.html')
-    return render_template('admin_page.html')
+    elif request.method == 'POST':
+        # print(request.form.get("file_photo", ""))
+        # print(request.form.get("num", ""))
+        new_task(request.form.get("file_photo", ""), request.form.get("num", ""))
+        return render_template('admin_page.html')
 
 
 def res_json():
     print(my_user.clas)
     print(my_user.name)
-    # print(my_user.res_task)
-    # print(my_user.res_des)
     for i in range(3):
         my_user.result.append([my_user.res_task[i], my_user.res_des[i]])
     print(my_user.result)
@@ -167,9 +156,12 @@ def res_json():
 
 def tasks(my_counter, img):
     my_counter.counter += 1
-    # res = request.form
-    # print('результат', res.getlist('decision'))
     return render_template('tasks_page.html', img=img)
+
+
+def new_task(photo_name, num):
+    if int(num) in [1, 2, 3]:
+        print(photo_name, num)
 
 
 if __name__ == '__main__':
