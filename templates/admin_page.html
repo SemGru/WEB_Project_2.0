@@ -2,14 +2,15 @@
 
 {% block content %}
 <h3 align="center">Страничка администратора</h3>
-<form class="login_form" method="post">
+<form class="login_form" method="post" enctype=multipart/form-data>
     <h6 align="center">Загрузить задачу (фото) </h6>
-    <input type="file" class="form-control-file" id="photo" name="file_photo" required>
+    <h7 align="center">{{ status }}</h7>
+    <input type="file" class="form-control-file" id="photo" name="file" required>
     <input type="text" class="form-control" id="num" aria-describedby="classHelp"
            placeholder="Введите номер задачи" name="num" required>
     <br>
     </div>
-    <button type="submit" class="btn btn-primary">Отправить</button>
+    <button type="submit" class="btn btn-primary">Загрузить</button>
     </div>
 </form>
 <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">

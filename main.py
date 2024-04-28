@@ -13,6 +13,9 @@ import sqlite3
 from flask import Flask, url_for, request, render_template, redirect, request, abort
 from flask import send_file
 from json_file import res_file
+import os
+from flask import Flask, flash, request, redirect, url_for
+from werkzeug.utils import secure_filename
 
 # from admin_files import new_task_to_db
 # from new_task_to_db import new_task_to_db
@@ -21,13 +24,10 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 
-UPLOAD_FOLDER = 'static/img/'
-
 app.secret_key = "secret key"
+UPLOAD_FOLDER = 'static/img'
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 
 
 class User_start():
@@ -151,13 +151,37 @@ def login():
 
 @app.route('/admin_page', methods=['POST', 'GET'])
 def admin_page():
-    if request.method == 'GET':
-        return render_template('admin_page.html')
-    elif request.method == 'POST':
-        # print(request.form.get("file_photo", ""))
-        # print(request.form.get("num", ""))
-        new_task(request.form.get("file_photo", ""), request.form.get("num", ""), request.files['file_photo'])
-        return render_template('admin_page.html')
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        # If the user does not select a file, the browser submits an
+        # empty file without a filename.
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            new_task(filename, request.form.getlist('num')[0])
+            render_template('admin_page.html')
+    return render_template('admin_page.html')
+    # return '''
+    # <!doctype html>
+    # <title>Upload new File</title>
+    # <h1>Upload new File</h1>
+    # <form method=post enctype=multipart/form-data>
+    #   <input type=file name=file>
+    #   <input type=submit value=Upload>
+    # </form>
+    # '''
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @app.route('/download_json', methods=['POST', 'GET'])
@@ -188,7 +212,13 @@ def tasks(my_counter, img):
     return render_template('tasks_page.html', img=img)
 
 
-def new_task(photo_name, num, file):
+def new_task(photo_name, num):
+    DB = sqlite3.connect('DB/test_web.db')
+    SQL = DB.cursor()
+    a = int(num)
+    b = '/static/img/' + photo_name
+    SQL.execute(f"INSERT INTO Task Values (?, ?)", (a, b))
+    DB.commit()
     # if int(num) in [1, 2, 3]:
     #     print(photo_name, num)
     # if int(num) in [1, 2, 3] and allowed_file(photo_name):
@@ -197,7 +227,6 @@ def new_task(photo_name, num, file):
     #     # print('upload_image filename: ' + filename)
     #     return render_template('admin_page.html')
     # else:
-    return render_template('admin_page.html')
 
 
 def allowed_file(filename):
