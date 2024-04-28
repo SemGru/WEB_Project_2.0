@@ -14,14 +14,8 @@ def res_file(name, clas, res):
                 json.dump(data, outfile, ensure_ascii=False, indent=2)
         else:
             with open('result.json', 'w', encoding='utf-8') as outfile:
-                json.dump({str(time)[5:]: time_dict}, outfile, ensure_ascii=False, indent=2)
-    # time = datetime.date.today()
-    # json_dict = {str(time)[5:]: time_dict}
+                json.dump({str(time): time_dict}, outfile, ensure_ascii=False, indent=2)
 
-    # with open('result.json') as f:
-    #     templates = json.load(f)
-    # with open('result.json', 'w') as file:
-    #     json.dump(json_dict, file)
 
 
 

@@ -1,29 +1,20 @@
-import json
-
-from flask import Flask, render_template, redirect, request, abort
-from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-import os
-from werkzeug.utils import secure_filename
-import datetime
+from flask_login import LoginManager, login_user, login_required, logout_user
 from forms.user import RegisterForm, LoginForm
 from data.users import User
 from data import db_session
 import random
 import sqlite3
-from flask import Flask, url_for, request, render_template, redirect, request, abort
+from flask import render_template
 from flask import send_file
 from json_file import res_file
 import os
-from flask import Flask, flash, request, redirect, url_for
+from flask import Flask, flash, request, redirect
 from werkzeug.utils import secure_filename
 
-# from admin_files import new_task_to_db
-# from new_task_to_db import new_task_to_db
 app = Flask(__name__)
 login_manager = LoginManager()
 login_manager.init_app(app)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
-
 app.secret_key = "secret key"
 UPLOAD_FOLDER = 'static/img'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
@@ -72,13 +63,6 @@ def main():
     app.run()
 
 
-@app.route('/adminpage', methods=['GET', 'POST'])
-@login_required
-def news_delete(id):
-    print('Какая-то страница № 1')
-    return redirect('/')
-
-
 @app.route('/', methods=['POST', 'GET'])
 def start_page():
     if request.method == 'GET':
@@ -93,10 +77,6 @@ def start_page():
             list_img = [i[1] for i in al]
             img = str(random.choice(list_img))
 
-        # без базы данных
-        # al = ['/static/img/1280.gif', '/static/img/1267.gif', '/static/img/1276.gif', '/static/img/1270.gif']
-        # img = random.choice(al)
-        # del al[al.index(img)]
         name = request.form
         if 'name' in name:
             my_user.clas = str(name.getlist('clas'))
@@ -152,13 +132,10 @@ def login():
 @app.route('/admin_page', methods=['POST', 'GET'])
 def admin_page():
     if request.method == 'POST':
-        # check if the post request has the file part
         if 'file' not in request.files:
             flash('No file part')
             return redirect(request.url)
         file = request.files['file']
-        # If the user does not select a file, the browser submits an
-        # empty file without a filename.
         if file.filename == '':
             flash('No selected file')
             return redirect(request.url)
@@ -168,15 +145,6 @@ def admin_page():
             new_task(filename, request.form.getlist('num')[0])
             render_template('admin_page.html')
     return render_template('admin_page.html')
-    # return '''
-    # <!doctype html>
-    # <title>Upload new File</title>
-    # <h1>Upload new File</h1>
-    # <form method=post enctype=multipart/form-data>
-    #   <input type=file name=file>
-    #   <input type=submit value=Upload>
-    # </form>
-    # '''
 
 
 def allowed_file(filename):
@@ -190,21 +158,9 @@ def download_json():
 
 
 def res_json():
-    # print(my_user.clas)
-    # print(my_user.name)
     for i in range(3):
         my_user.result.append([my_user.res_task[i], my_user.res_des[i]])
-    # print(my_user.result)
     res_file(my_user.name, my_user.clas, my_user.result)
-    # key = f"{my_user.name} {my_user.clas}"
-    # time_dict = {key: my_user.result}
-    # json_dict = {datetime.date.today(): time_dict}
-    # print(json_dict)
-    # key = f"{my_user.name} {my_user.clas}"
-    # time_dict = {key: my_user.result}
-    # json_dict = {datetime.date.today(): time_dict}
-    # with open('result.json') as file:
-    #     json.dump(json_dict, file)
 
 
 def tasks(my_counter, img):
@@ -219,14 +175,6 @@ def new_task(photo_name, num):
     b = '/static/img/' + photo_name
     SQL.execute(f"INSERT INTO Task Values (?, ?)", (a, b))
     DB.commit()
-    # if int(num) in [1, 2, 3]:
-    #     print(photo_name, num)
-    # if int(num) in [1, 2, 3] and allowed_file(photo_name):
-    #     filename = secure_filename(photo_name)
-    #     request.files['file'].save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-    #     # print('upload_image filename: ' + filename)
-    #     return render_template('admin_page.html')
-    # else:
 
 
 def allowed_file(filename):
